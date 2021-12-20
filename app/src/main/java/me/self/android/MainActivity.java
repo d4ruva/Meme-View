@@ -27,6 +27,7 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_NAME = "";
+    public String url = "https://meme-api.herokuapp.com/gimme";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,31 +37,32 @@ public class MainActivity extends AppCompatActivity {
 
         ImageView imgView = findViewById(R.id.imgView);
 
+        // Calls API and Inserts image view Url
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Glide.with(getApplicationContext()).load(Uri.parse(response.getString("url"))).into(imgView);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO: Handle error
+                        Toast.makeText(getApplicationContext(), "Couldn't Get the meme. Try Connecting to the internet!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        // Show meme every time app is launched
+        queue.add(jsonObjectRequest);
+
         Button button = findViewById(R.id.nextButton);
         button.setOnClickListener(v -> {
-            String url = "https://meme-api.herokuapp.com/gimme";
-
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            //                                Toast.makeText(getApplicationContext(), response.getString("url"), Toast.LENGTH_SHORT).show();
-                            try {
-                                Glide.with(getApplicationContext()).load(Uri.parse(response.getString("url"))).into(imgView);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            // TODO: Handle error
-                            Toast.makeText(getApplicationContext(), "Coluldnt Get the meme. Try Connecting to the internet!", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
+            // Change image whenever button is clicked
             queue.add(jsonObjectRequest);
         });
         
