@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -33,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
-        Intent intent = new Intent(this, MemeView.class);
+        ImageView imgView = findViewById(R.id.imgView);
 
-        Button button = findViewById(R.id.button);
+        Button button = findViewById(R.id.nextButton);
         button.setOnClickListener(v -> {
             String url = "https://meme-api.herokuapp.com/gimme";
 
@@ -44,11 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onResponse(JSONObject response) {
+                            //                                Toast.makeText(getApplicationContext(), response.getString("url"), Toast.LENGTH_SHORT).show();
                             try {
-                                intent.putExtra(EXTRA_NAME, response.getString("url"));
-//                                Toast.makeText(getApplicationContext(), response.getString("url"), Toast.LENGTH_SHORT).show();
+                                Glide.with(getApplicationContext()).load(Uri.parse(response.getString("url"))).into(imgView);
                             } catch (JSONException e) {
-                                intent.putExtra(EXTRA_NAME, "Couldnt get it sorry");
                                 e.printStackTrace();
                             }
                         }
@@ -57,18 +57,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             // TODO: Handle error
-
+                            Toast.makeText(getApplicationContext(), "Coluldnt Get the meme. Try Connecting to the internet!", Toast.LENGTH_SHORT).show();
                         }
                     });
 
             queue.add(jsonObjectRequest);
-
-            try {
-//                intent.putExtra(EXTRA_NAME, "This is the Value");
-                startActivity(intent);
-            }catch (Exception e){
-                Toast.makeText(getApplicationContext(), "Got error", Toast.LENGTH_SHORT).show();
-            }
         });
+        
     }
 }
